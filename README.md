@@ -35,6 +35,11 @@ Finances Hub is a personal data platform for ingesting financial data (stocks an
 - **Cloud path**: Postgres maps directly to managed cloud databases when you outgrow local setups.
 - **Operational fit**: Ingestion pipelines benefit from a server database that can accept writes while queries run.
 
+## Version Control Policy
+- Single-person project using only the `master` branch with direct commits (no feature branches).
+- Revisit this policy if collaborators join or scope expands.
+- This may change in the future according to my needs.
+
 ## Repository Structure (Planned)
 ```
 finances_hub/
