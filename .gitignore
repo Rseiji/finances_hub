@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+
+# Local data
+/data/raw/
+
+# Logs
+*.log

@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "finances-hub"
+version = "0.1.0"
+description = "Local-first financial data ingestion and analytics hub"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+yfinance = "^0.2.40"
+pandas = "^2.2.2"
+psycopg = {version = "^3.2.1", extras = ["binary"]}
+yfinance = "^0.2.40"
+pandas = "^2.2.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+mypy = "^1.11.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
