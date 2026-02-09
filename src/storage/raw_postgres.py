@@ -23,9 +23,10 @@ def insert_envelopes(envelopes: Iterable[RawEnvelope]) -> int:
             env.source,
             env.endpoint,
             Json(env.request_params),
-            env.request_id,
+            env.asset,
+            env.currency,
+            env.uid,
             env.fetched_at,
-            env.run_id,
             Json(env.payload),
         )
         for env in envelopes
@@ -41,12 +42,13 @@ def insert_envelopes(envelopes: Iterable[RawEnvelope]) -> int:
                     source,
                     endpoint,
                     request_params,
-                    request_id,
+                    asset,
+                    currency,
+                    uid,
                     fetched_at,
-                    run_id,
                     payload
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 rows,
             )

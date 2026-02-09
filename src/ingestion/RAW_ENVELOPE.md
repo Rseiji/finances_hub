@@ -4,7 +4,7 @@ All ingestion connectors must return data wrapped in a `RawEnvelope`. This provi
 
 ## Purpose
 - Standardize ingestion metadata across all sources.
-- Ensure traceability (source, endpoint, params, run ID).
+- Ensure traceability (source, endpoint, params, uid).
 - Support append-only raw storage and replay.
 
 ## Required Fields
@@ -13,18 +13,20 @@ All ingestion connectors must return data wrapped in a `RawEnvelope`. This provi
 | source | string | Provider name (e.g., coingecko, stock) |
 | endpoint | string | Full URL or endpoint path used for the fetch |
 | request_params | object | Parameters sent with the request |
-| request_id | string | Unique ID for the request |
+| asset | string | Asset being ingested (e.g., bitcoin, ^GSPC) |
+| currency | string | Quote currency used for valuation (e.g., usd, brl) |
+| uid | string | Unique ID for the envelope |
 | fetched_at | string | ISO 8601 UTC timestamp |
-| run_id | string | ID of the ingestion run |
 | payload | object | Raw or lightly structured payload from the provider |
 
 ## Example (Conceptual)
 - `source`: "coingecko"
 - `endpoint`: "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
 - `request_params`: `{ "vs_currency": "usd", "days": "7", "coin_id": "bitcoin" }`
-- `request_id`: "uuid"
+- `asset`: "bitcoin"
+- `currency`: "usd"
+- `uid`: "uuid"
 - `fetched_at`: "2026-02-08T03:32:09.877048+00:00"
-- `run_id`: "uuid"
 - `payload`: `{ ... }`
 
 ## Implementation

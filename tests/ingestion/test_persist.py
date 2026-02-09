@@ -14,9 +14,10 @@ def _sample_envelopes() -> List[RawEnvelope]:
             source="unit",
             endpoint="unit.endpoint",
             request_params={"foo": "bar"},
-            request_id="11111111-1111-1111-1111-111111111111",
+            asset="BTC",
+            currency="usd",
+            uid="11111111-1111-1111-1111-111111111111",
             fetched_at="2024-01-01T00:00:00+00:00",
-            run_id="22222222-2222-2222-2222-222222222222",
             payload={"value": 1},
         )
     ]

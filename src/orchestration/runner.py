@@ -24,17 +24,19 @@ def run_all(
     start_date = (date.today() - timedelta(days=7)).isoformat()
     job_map = jobs or {
         "coingecko_bitcoin_daily": make_coingecko_job("bitcoin", days="7"),
-        "yfinance_sp500": make_stock_job(
+        "yfinance_sp500": make_yfinance_job(
             "^GSPC",
             job_name="yfinance_sp500",
             start_date=start_date,
             end_date=end_date,
+            currency="usd",
         ),
-        "yfinance_ibov": make_stock_job(
+        "yfinance_ibov": make_yfinance_job(
             "^BVSP",
             job_name="yfinance_ibov",
             start_date=start_date,
             end_date=end_date,
+            currency="brl",
         ),
     }
 
@@ -47,6 +49,7 @@ def make_coingecko_job(
     job_name: str | None = None,
     days: str | None = None,
     interval: str | None = None,
+    asset: str | None = None,
 ) -> callable:
     def _runner(config: OrchestrationConfig | None = None) -> int:
         merged_kwargs = {"coin_id": coin_id, "vs_currency": vs_currency}
@@ -54,6 +57,8 @@ def make_coingecko_job(
             merged_kwargs["days"] = days
         if interval is not None:
             merged_kwargs["interval"] = interval
+        if asset is not None:
+            merged_kwargs["asset"] = asset
         return run_asset_ingestion(
             config=config,
             job_name=job_name or f"coingecko_{coin_id}",
@@ -65,11 +70,13 @@ def make_coingecko_job(
     return _runner
 
 
-def make_stock_job(
+def make_yfinance_job(
     symbol: str,
     job_name: str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    currency: str | None = None,
+    asset: str | None = None,
 ) -> callable:
     def _runner(config: OrchestrationConfig | None = None) -> int:
         merged_kwargs = {"symbol": symbol}
@@ -77,6 +84,10 @@ def make_stock_job(
             merged_kwargs["start_date"] = start_date
         if end_date is not None:
             merged_kwargs["end_date"] = end_date
+        if currency is not None:
+            merged_kwargs["currency"] = currency
+        if asset is not None:
+            merged_kwargs["asset"] = asset
         return run_asset_ingestion(
             config=config,
             job_name=job_name or f"yfinance_{symbol}",

@@ -31,7 +31,7 @@ This document defines the required implementation rules for any agent working on
 - No surrogate keys in staged/curated tables unless justified.
 
 ## 6. Raw Metadata Policy
-- Store source, endpoint, params, request_id, fetched_at, and run_id for every raw record.
+- Store source, endpoint, params, asset, currency, uid, and fetched_at for every raw record.
 - Raw tables are append-only and use the generic envelope pattern.
 
 ## 7. Logging Policy

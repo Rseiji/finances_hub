@@ -28,4 +28,6 @@ def test_fetch_bitcoin_daily_prices_returns_envelope() -> None:
         envelopes = fetch_bitcoin_daily_prices(days=7, vs_currency="usd")
 
     assert len(envelopes) == 1
+    assert envelopes[0].asset == "bitcoin"
+    assert envelopes[0].currency == "usd"
     assert envelopes[0].payload["prices"] == payload["prices"]

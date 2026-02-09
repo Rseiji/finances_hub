@@ -28,6 +28,8 @@ def test_fetch_close_prices_returns_envelope() -> None:
 
     assert len(envelopes) == 1
     payload = envelopes[0].payload
+    assert envelopes[0].asset == "^GSPC"
+    assert envelopes[0].currency == "usd"
     assert payload["symbol"] == "^GSPC"
     assert len(payload["rows"]) == 2
     assert payload["rows"][0]["value"] == 10.5

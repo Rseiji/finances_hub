@@ -110,7 +110,7 @@ All staged and curated tables must be defined with explicit column names, types,
 
 ## 6.6 Raw DDL Generalization Principles
 To support new sources without reworking storage, raw ingestion must follow a **generic envelope** pattern:
-- Each raw table stores: `source`, `endpoint`, `request_params`, `request_id`, `fetched_at`, `run_id`, and the **provider payload** (JSON).
+- Each raw table stores: `source`, `endpoint`, `request_params`, `asset`, `currency`, `uid`, `fetched_at`, and the **provider payload** (JSON).
 - Raw tables can be source-specific (e.g., `raw_prices_stock`) but must keep the same metadata columns to allow uniform replay and auditing.
 - New sources must map into the existing raw categories (prices, trades, wallets). Only add new raw tables if the data does not fit these categories.
 - All raw tables must be append-only and never updated in place.

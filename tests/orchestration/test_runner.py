@@ -14,9 +14,10 @@ def _sample_envelope() -> RawEnvelope:
         source="unit",
         endpoint="unit.endpoint",
         request_params={"foo": "bar"},
-        request_id="11111111-1111-1111-1111-111111111111",
+        asset="BTC",
+        currency="usd",
+        uid="11111111-1111-1111-1111-111111111111",
         fetched_at="2024-01-01T00:00:00+00:00",
-        run_id="22222222-2222-2222-2222-222222222222",
         payload={"value": 1},
     )
 
@@ -88,33 +89,42 @@ def test_run_asset_ingestion_accepts_stock_fetcher(monkeypatch: pytest.MonkeyPat
 
 
 def test_factory_jobs_call_runners(monkeypatch: pytest.MonkeyPatch) -> None:
-    captured: dict[str, Any] = {}
+    captured: list[dict[str, Any]] = []
 
     def _run_asset_ingestion(*, fetch_kwargs: dict[str, str], **kwargs) -> int:
-        captured.update(fetch_kwargs)
+        captured.append(fetch_kwargs)
         return 5
 
     monkeypatch.setattr(runner, "run_asset_ingestion", _run_asset_ingestion)
     config = OrchestrationConfig()
 
-    crypto_job = runner.make_coingecko_job("bitcoin", days="7")
-    stock_job = runner.make_stock_job(
+    crypto_job = runner.make_coingecko_job("bitcoin", days="7", asset="BTC")
+    stock_job = runner.make_yfinance_job(
         "^BVSP",
         job_name="yfinance_ibov",
         start_date="2023-12-31",
         end_date="2024-01-10",
+        currency="brl",
+        asset="IBOV",
     )
 
     assert crypto_job(config) == 5
     assert stock_job(config) == 5
-    assert captured == {
-        "coin_id": "bitcoin",
-        "vs_currency": "usd",
-        "days": "7",
-        "symbol": "^BVSP",
-        "start_date": "2023-12-31",
-        "end_date": "2024-01-10",
-    }
+    assert captured == [
+        {
+            "coin_id": "bitcoin",
+            "vs_currency": "usd",
+            "days": "7",
+            "asset": "BTC",
+        },
+        {
+            "symbol": "^BVSP",
+            "start_date": "2023-12-31",
+            "end_date": "2024-01-10",
+            "currency": "brl",
+            "asset": "IBOV",
+        },
+    ]
 
 
 def test_run_all_custom_jobs() -> None:

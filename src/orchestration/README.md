@@ -12,17 +12,19 @@ Create job callables by passing the asset identifier and explicit backfill param
 from orchestration import (
   OrchestrationConfig,
   make_coingecko_job,
-  make_stock_job,
+  make_yfinance_job,
 )
 
 config = OrchestrationConfig()
 
-btc_job = make_coingecko_job("bitcoin", days="7")
-sp500_job = make_stock_job(
+btc_job = make_coingecko_job("bitcoin", days="7", asset="BTC")
+sp500_job = make_yfinance_job(
   "^GSPC",
   job_name="yfinance_sp500",
   start_date="2023-12-31",
   end_date="2024-01-10",
+  currency="usd",
+  asset="SP500",
 )
 
 btc_job(config)

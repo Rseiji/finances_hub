@@ -13,7 +13,7 @@ def fetch_market_chart(
     coin_id: str,
     days: str = "max",
     vs_currency: str = "usd",
-    run_id: str | None = None,
+    asset: str | None = None,
 ) -> List[RawEnvelope]:
     endpoint = f"{COINGECKO_BASE}/coins/{coin_id}/market_chart"
     params: Dict[str, Any] = {
@@ -26,9 +26,10 @@ def fetch_market_chart(
         source="coingecko",
         endpoint=endpoint,
         request_params={**params, "coin_id": coin_id},
-        request_id=str(uuid.uuid4()),
+        asset=asset or coin_id,
+        currency=vs_currency,
+        uid=str(uuid.uuid4()),
         fetched_at=RawEnvelope.utc_now_iso(),
-        run_id=run_id or str(uuid.uuid4()),
         payload=payload,
     )
     return [envelope]
@@ -37,7 +38,7 @@ def fetch_market_chart(
 def fetch_current_price(
     coin_id: str,
     vs_currency: str = "usd",
-    run_id: str | None = None,
+    asset: str | None = None,
 ) -> List[RawEnvelope]:
     endpoint = f"{COINGECKO_BASE}/simple/price"
     params: Dict[str, Any] = {
@@ -50,9 +51,10 @@ def fetch_current_price(
         source="coingecko",
         endpoint=endpoint,
         request_params={**params, "coin_id": coin_id},
-        request_id=str(uuid.uuid4()),
+        asset=asset or coin_id,
+        currency=vs_currency,
+        uid=str(uuid.uuid4()),
         fetched_at=RawEnvelope.utc_now_iso(),
-        run_id=run_id or str(uuid.uuid4()),
         payload=payload,
     )
     return [envelope]
@@ -61,7 +63,7 @@ def fetch_current_price(
 def fetch_bitcoin_daily_prices(
     days: int,
     vs_currency: str = "usd",
-    run_id: str | None = None,
+    asset: str | None = None,
 ) -> List[RawEnvelope]:
     endpoint = f"{COINGECKO_BASE}/coins/bitcoin/market_chart"
     params: Dict[str, Any] = {
@@ -75,9 +77,10 @@ def fetch_bitcoin_daily_prices(
         source="coingecko",
         endpoint=endpoint,
         request_params={**params, "coin_id": "bitcoin"},
-        request_id=str(uuid.uuid4()),
+        asset=asset or "bitcoin",
+        currency=vs_currency,
+        uid=str(uuid.uuid4()),
         fetched_at=RawEnvelope.utc_now_iso(),
-        run_id=run_id or str(uuid.uuid4()),
         payload=payload,
     )
     return [envelope]
