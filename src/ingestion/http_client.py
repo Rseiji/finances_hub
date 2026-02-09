@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
-def _build_url(url: str, params: Optional[Dict[str, Any]] = None) -> str:
+def _build_url(url: str, params: Dict[str, Any] | None = None) -> str:
     if not params:
         return url
     return f"{url}?{urlencode(params)}"
@@ -14,8 +14,8 @@ def _build_url(url: str, params: Optional[Dict[str, Any]] = None) -> str:
 
 def fetch_json(
     url: str,
-    params: Optional[Dict[str, Any]] = None,
-    headers: Optional[Dict[str, str]] = None,
+    params: Dict[str, Any] | None = None,
+    headers: Dict[str, str] | None = None,
     timeout: int = 30,
 ) -> Dict[str, Any]:
     full_url = _build_url(url, params)

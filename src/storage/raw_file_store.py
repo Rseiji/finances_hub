@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable
 
 from ingestion.models import RawEnvelope
 
@@ -10,7 +10,7 @@ from ingestion.models import RawEnvelope
 def write_envelopes(
     category: str,
     envelopes: Iterable[RawEnvelope],
-    base_dir: Optional[Path] = None,
+    base_dir: Path | None = None,
 ) -> Path:
     root = base_dir or Path("data/raw")
     target_dir = root / category

@@ -11,8 +11,6 @@ python = ">=3.11,<3.13"
 yfinance = "^0.2.40"
 pandas = "^2.2.2"
 psycopg = {version = "^3.2.1", extras = ["binary"]}
-yfinance = "^0.2.40"
-pandas = "^2.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

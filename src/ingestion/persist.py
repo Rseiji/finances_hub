@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, Literal, Optional
+from typing import Iterable, Literal
 
 from ingestion.models import RawEnvelope
 from storage.raw_file_store import write_envelopes
@@ -13,7 +13,7 @@ Sink = Literal["file", "postgres", "both", "none"]
 def inject_envelopes(
     envelopes: Iterable[RawEnvelope],
     category: str,
-    sink: Optional[Sink] = None,
+    sink: Sink | None = None,
 ) -> Sink:
     target = sink or os.environ.get("FINANCES_HUB_SINK", "none")
     if target not in {"file", "postgres", "both", "none"}:
