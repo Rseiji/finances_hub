@@ -40,6 +40,13 @@ Finances Hub is a personal data platform for ingesting financial data (stocks an
 - Revisit this policy if collaborators join or scope expands.
 - This may change in the future according to my needs.
 
+## Running the Project
+### Data Ingestion
+1. Ensure Postgres is running and the bronze schema is applied.
+2. Set the database connection string:
+  - `FINANCES_HUB_PG_DSN=postgresql://<user>:<password>@localhost:5432/finances_hub`
+3. Run ingestion jobs or orchestration as needed.
+
 ## Repository Structure (Planned)
 ```
 finances_hub/

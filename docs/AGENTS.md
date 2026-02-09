@@ -50,6 +50,7 @@ This document defines the required implementation rules for any agent working on
 - Conform to PEP 8 with a maximum line length of **120** characters.
 - All new code must pass `mypy` with strict type checking for core pipeline modules.
 - Prefer PEP 604 unions (e.g., `str | None`) over `typing.Optional`.
+- Order code top-down: public API first, helpers last.
 - Every new Python package or submodule directory must include an `__init__.py`.
 
 ## 11. Agent Checklist (Must-Read)

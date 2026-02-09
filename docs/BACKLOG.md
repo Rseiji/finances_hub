@@ -3,9 +3,10 @@
 This backlog is a living checklist. Check items as they are completed.
 
 ## 1) Orchestration & Backfills
-- [ ] Add a minimal orchestrator to run ingestion jobs.
+- [x] Add a minimal orchestrator to run ingestion jobs.
 - [ ] Implement backfill logic (detect last successful date and fill gaps).
 - [ ] Define retry strategy and logging for failed runs.
+- [ ] Refactor `run_all()` to use a configurable factory for multi-asset ingestion (currencies, symbols, window params).
 
 ## 2) Bronze Storage & Retention
 - [ ] Confirm indexing strategy for `bronze.ingestion_events` based on query patterns.
