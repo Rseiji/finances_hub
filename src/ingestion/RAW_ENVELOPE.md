@@ -10,7 +10,7 @@ All ingestion connectors must return data wrapped in a `RawEnvelope`. This provi
 ## Required Fields
 | Field | Type | Description |
 |---|---|---|
-| source | string | Provider name (e.g., coingecko, stock) |
+| source | string | Provider name (e.g., binance, yfinance) |
 | endpoint | string | Full URL or endpoint path used for the fetch |
 | request_params | object | Parameters sent with the request |
 | asset | string | Asset being ingested (e.g., bitcoin, ^GSPC) |
@@ -20,8 +20,8 @@ All ingestion connectors must return data wrapped in a `RawEnvelope`. This provi
 | payload | object | Raw or lightly structured payload from the provider |
 
 ## Example (Conceptual)
-- `source`: "coingecko"
-- `endpoint`: "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+- `source`: "binance"
+- `endpoint`: "https://api.binance.com/api/v3/klines"
 - `request_params`: `{ "vs_currency": "usd", "days": "7", "coin_id": "bitcoin" }`
 - `asset`: "bitcoin"
 - `currency`: "usd"

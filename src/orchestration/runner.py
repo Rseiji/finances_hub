@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-from ingestion.coingecko import fetch_market_chart
+from ingestion.binance import fetch_klines_daily
 from ingestion.persist import Sink, inject_envelopes
 from ingestion.yfinance_stock import fetch_close_prices
 
@@ -22,19 +22,41 @@ def run_all(
     config = config or OrchestrationConfig()
     end_date = date.today().isoformat()
     start_date = (date.today() - timedelta(days=7)).isoformat()
+    history_start_date = "2020-01-01"
+    yfinance_start_date = history_start_date
     job_map = jobs or {
-        "coingecko_bitcoin_daily": make_coingecko_job("bitcoin", days="7"),
+        "binance_btcusdt_daily": make_binance_job(
+            "BTCUSDT",
+            start_date=history_start_date,
+            end_date=end_date,
+            quote_currency="usdt",
+            asset="BTC",
+        ),
+        "binance_ethusdt_daily": make_binance_job(
+            "ETHUSDT",
+            start_date=history_start_date,
+            end_date=end_date,
+            quote_currency="usdt",
+            asset="ETH",
+        ),
+        "binance_solusdt_daily": make_binance_job(
+            "SOLUSDT",
+            start_date=history_start_date,
+            end_date=end_date,
+            quote_currency="usdt",
+            asset="SOL",
+        ),
         "yfinance_sp500": make_yfinance_job(
             "^GSPC",
             job_name="yfinance_sp500",
-            start_date=start_date,
+            start_date=yfinance_start_date,
             end_date=end_date,
             currency="usd",
         ),
         "yfinance_ibov": make_yfinance_job(
             "^BVSP",
             job_name="yfinance_ibov",
-            start_date=start_date,
+            start_date=yfinance_start_date,
             end_date=end_date,
             currency="brl",
         ),
@@ -43,27 +65,29 @@ def run_all(
     return {name: job(config) for name, job in job_map.items()}
 
 
-def make_coingecko_job(
-    coin_id: str,
-    vs_currency: str = "usd",
+def make_binance_job(
+    symbol: str,
+    start_date: str,
+    end_date: str | None = None,
+    quote_currency: str = "usdt",
     job_name: str | None = None,
-    days: str | None = None,
-    interval: str | None = None,
     asset: str | None = None,
 ) -> callable:
     def _runner(config: OrchestrationConfig | None = None) -> int:
-        merged_kwargs = {"coin_id": coin_id, "vs_currency": vs_currency}
-        if days is not None:
-            merged_kwargs["days"] = days
-        if interval is not None:
-            merged_kwargs["interval"] = interval
+        merged_kwargs = {
+            "symbol": symbol,
+            "start_date": start_date,
+            "quote_currency": quote_currency,
+        }
+        if end_date is not None:
+            merged_kwargs["end_date"] = end_date
         if asset is not None:
             merged_kwargs["asset"] = asset
         return run_asset_ingestion(
             config=config,
-            job_name=job_name or f"coingecko_{coin_id}",
-            category="coingecko",
-            fetcher=fetch_market_chart,
+            job_name=job_name or f"binance_{symbol}",
+            category="binance",
+            fetcher=fetch_klines_daily,
             fetch_kwargs=merged_kwargs,
         )
 

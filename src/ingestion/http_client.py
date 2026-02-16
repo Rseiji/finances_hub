@@ -23,3 +23,16 @@ def fetch_json(
     with urlopen(req, timeout=timeout) as response:
         raw = response.read().decode("utf-8")
     return json.loads(raw)
+
+
+def fetch_json_any(
+    url: str,
+    params: Dict[str, Any] | None = None,
+    headers: Dict[str, str] | None = None,
+    timeout: int = 30,
+) -> Any:
+    full_url = _build_url(url, params)
+    req = Request(full_url, headers=headers or {})
+    with urlopen(req, timeout=timeout) as response:
+        raw = response.read().decode("utf-8")
+    return json.loads(raw)

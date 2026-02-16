@@ -25,35 +25,38 @@ def _sample_envelope() -> RawEnvelope:
 def test_run_asset_ingestion_calls_fetch_and_inject(monkeypatch: pytest.MonkeyPatch) -> None:
     captured: dict[str, Any] = {}
 
-    def _fetch_market_chart(*, coin_id: str, days: str, vs_currency: str) -> List[RawEnvelope]:
-        captured["coin_id"] = coin_id
-        captured["days"] = days
-        captured["vs_currency"] = vs_currency
+    def _fetch_klines_daily(*, symbol: str, start_date: str, end_date: str) -> List[RawEnvelope]:
+        captured["symbol"] = symbol
+        captured["start_date"] = start_date
+        captured["end_date"] = end_date
         return [_sample_envelope()]
 
     def _inject_envelopes(envelopes: List[RawEnvelope], category: str, sink: Any = None) -> None:
         captured["category"] = category
         captured["count"] = len(envelopes)
 
-    monkeypatch.setattr(runner, "fetch_market_chart", _fetch_market_chart)
     monkeypatch.setattr(runner, "inject_envelopes", _inject_envelopes)
 
     config = OrchestrationConfig(sink="none")
 
     result = runner.run_asset_ingestion(
         config=config,
-        job_name="coingecko_bitcoin",
-        category="coingecko",
-        fetcher=runner.fetch_market_chart,
-        fetch_kwargs={"coin_id": "bitcoin", "vs_currency": "usd", "days": "7"},
+        job_name="binance_btcusdt",
+        category="binance",
+        fetcher=_fetch_klines_daily,
+        fetch_kwargs={
+            "symbol": "BTCUSDT",
+            "start_date": "2020-01-01",
+            "end_date": "2020-01-02",
+        },
     )
 
     assert result == 1
     assert captured == {
-        "coin_id": "bitcoin",
-        "days": "7",
-        "vs_currency": "usd",
-        "category": "coingecko",
+        "symbol": "BTCUSDT",
+        "start_date": "2020-01-01",
+        "end_date": "2020-01-02",
+        "category": "binance",
         "count": 1,
     }
 
@@ -98,7 +101,13 @@ def test_factory_jobs_call_runners(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(runner, "run_asset_ingestion", _run_asset_ingestion)
     config = OrchestrationConfig()
 
-    crypto_job = runner.make_coingecko_job("bitcoin", days="7", asset="BTC")
+    binance_job = runner.make_binance_job(
+        "BTCUSDT",
+        start_date="2020-01-01",
+        end_date="2020-01-02",
+        quote_currency="usdt",
+        asset="BTC",
+    )
     stock_job = runner.make_yfinance_job(
         "^BVSP",
         job_name="yfinance_ibov",
@@ -108,13 +117,14 @@ def test_factory_jobs_call_runners(monkeypatch: pytest.MonkeyPatch) -> None:
         asset="IBOV",
     )
 
-    assert crypto_job(config) == 5
+    assert binance_job(config) == 5
     assert stock_job(config) == 5
     assert captured == [
         {
-            "coin_id": "bitcoin",
-            "vs_currency": "usd",
-            "days": "7",
+            "symbol": "BTCUSDT",
+            "start_date": "2020-01-01",
+            "end_date": "2020-01-02",
+            "quote_currency": "usdt",
             "asset": "BTC",
         },
         {

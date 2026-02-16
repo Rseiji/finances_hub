@@ -10,7 +10,7 @@ This document lists candidate free data sources. Final selection is **to be eval
 - Twelve Data (free tier)
 
 ## Crypto (Candidates)
-- CoinGecko (public API)
+- Binance (public API)
 - CoinCap (public API)
 - CryptoCompare (free tier)
 - CoinPaprika (public API)

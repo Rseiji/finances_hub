@@ -122,14 +122,20 @@ Example:
 ```python
 import os
 
-from ingestion.coingecko import fetch_bitcoin_daily_prices
+from ingestion.binance import fetch_klines_daily
 from ingestion.persist import inject_envelopes
 
 os.environ["FINANCES_HUB_PG_DSN"] = "postgresql://my_user_here:my_pwd_here@localhost:5432/finances_hub"
 os.environ["FINANCES_HUB_SINK"] = "postgres"
 
-envelopes = fetch_bitcoin_daily_prices(days=7, vs_currency="usd")
-inject_envelopes(envelopes, category="coingecko")
+envelopes = fetch_klines_daily(
+  symbol="BTCUSDT",
+  start_date="2024-01-01",
+  end_date="2024-01-07",
+  quote_currency="usdt",
+  asset="BTC",
+)
+inject_envelopes(envelopes, category="binance")
 ```
 
 ## 7. Orchestration

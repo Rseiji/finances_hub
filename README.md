@@ -47,6 +47,22 @@ Finances Hub is a personal data platform for ingesting financial data (stocks an
   - `FINANCES_HUB_PG_DSN=postgresql://<user>:<password>@localhost:5432/finances_hub`
 3. Run ingestion jobs or orchestration as needed.
 
+#### Bronze Ingestion (Default Jobs)
+Run the default bronze layer ingestion (binance crypto + yfinance SP500/IBOV):
+
+```bash
+source .venv/bin/activate
+export FINANCES_HUB_PG_DSN=postgresql://<user>:<password>@localhost:5432/finances_hub
+export FINANCES_HUB_SINK=postgres
+PYTHONPATH=src python - <<'PY'
+from orchestration.runner import OrchestrationConfig, run_all
+
+config = OrchestrationConfig()
+results = run_all(config=config)
+print(results)
+PY
+```
+
 ## Repository Structure (Planned)
 ```
 finances_hub/

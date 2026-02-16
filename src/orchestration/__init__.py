@@ -1,6 +1,6 @@
 from orchestration.runner import (
     OrchestrationConfig,
-    make_coingecko_job,
+    make_binance_job,
     make_yfinance_job,
     run_all,
     run_asset_ingestion,
@@ -8,7 +8,7 @@ from orchestration.runner import (
 
 __all__ = [
     "OrchestrationConfig",
-    "make_coingecko_job",
+    "make_binance_job",
     "make_yfinance_job",
     "run_all",
     "run_asset_ingestion",
