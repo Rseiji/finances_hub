@@ -36,3 +36,20 @@ CREATE INDEX IF NOT EXISTS idx_binance_prices_symbol ON silver.binance_prices (s
 CREATE INDEX IF NOT EXISTS idx_binance_prices_asset ON silver.binance_prices (asset);
 CREATE INDEX IF NOT EXISTS idx_binance_prices_price_ts ON silver.binance_prices (price_ts);
 CREATE INDEX IF NOT EXISTS idx_binance_prices_fetched_at ON silver.binance_prices (fetched_at);
+
+
+CREATE TABLE IF NOT EXISTS silver.nuinvest_trade_events (
+    event_id UUID PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    quantidade INTEGER NOT NULL,
+    preco NUMERIC(18, 6) NOT NULL,
+    valor NUMERIC(18, 6) NOT NULL,
+    tax NUMERIC(18, 6) NOT NULL,
+    statement_date DATE NULL,
+    fetched_at TIMESTAMPTZ NOT NULL,
+    ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_nuinvest_trade_events_ticker ON silver.nuinvest_trade_events (ticker);
+CREATE INDEX IF NOT EXISTS idx_nuinvest_trade_events_statement_date ON silver.nuinvest_trade_events (statement_date);
+CREATE INDEX IF NOT EXISTS idx_nuinvest_trade_events_fetched_at ON silver.nuinvest_trade_events (fetched_at);
