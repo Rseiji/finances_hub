@@ -64,6 +64,30 @@ def run_all(
             end_date=end_date,
             currency="brl",
         ),
+        "yfinance_petr4": make_yfinance_job(
+            "PETR4.SA",
+            job_name="yfinance_petr4",
+            start_date=yfinance_start_date,
+            end_date=end_date,
+            currency="brl",
+            asset="PETR4",
+        ),
+        "yfinance_mypk3": make_yfinance_job(
+            "MYPK3.SA",
+            job_name="yfinance_mypk3",
+            start_date=yfinance_start_date,
+            end_date=end_date,
+            currency="brl",
+            asset="MYPK3",
+        ),
+        "yfinance_vale3": make_yfinance_job(
+            "VALE3.SA",
+            job_name="yfinance_vale3",
+            start_date=yfinance_start_date,
+            end_date=end_date,
+            currency="brl",
+            asset="VALE3",
+        ),
     }
 
     results = {name: job(config) for name, job in job_map.items()}

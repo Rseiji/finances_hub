@@ -15,9 +15,9 @@ def test_gold_transform_sql_contains_upserts() -> None:
     assert "FROM silver.binance_prices" in crypto_sql
     assert "ON CONFLICT (asset, currency, price_date)" in crypto_sql
     assert "INSERT INTO gold.fiat_fx_rates_daily" in fx_sql
-    assert "ON CONFLICT (pair_code, rate_date)" in fx_sql
+    assert "ON CONFLICT (asset, currency, rate_date)" in fx_sql
     assert "INSERT INTO gold.indices_daily" in indices_sql
-    assert "ON CONFLICT (index_code, price_date)" in indices_sql
+    assert "ON CONFLICT (asset, currency, price_date)" in indices_sql
     assert "INSERT INTO gold.etfs_daily" in etfs_sql
-    assert "ON CONFLICT (symbol, price_date)" in etfs_sql
+    assert "ON CONFLICT (asset, currency, price_date)" in etfs_sql
     assert "INSERT INTO gold.br_stocks_daily" in br_sql

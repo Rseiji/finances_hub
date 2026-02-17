@@ -6,9 +6,10 @@ This document describes gold-layer historical tables used for analytics and dash
 Daily fiat FX rates, quoted as base/quote currency pairs (e.g., USDBRL).
 
 Columns:
-- pair_code: Pair symbol such as USDBRL or JPYBRL.
+- asset: Pair code such as USDBRL or JPYBRL.
 - base_currency: Base currency code (e.g., USD).
 - quote_currency: Quote currency code (e.g., BRL).
+- currency: Quote currency code (e.g., BRL).
 - rate: FX rate for one unit of base in quote.
 - rate_date: Date for the observation (daily grain).
 - rate_ts: Timestamp for the observation in UTC (daily series uses midnight).
@@ -17,7 +18,7 @@ Columns:
 - ingested_at: When the gold row was written (UTC).
 
 Keys and constraints:
-- Unique key: (pair_code, rate_date)
+- Unique key: (asset, currency, rate_date)
 
 ## Table: gold.crypto_prices_daily
 Daily crypto prices, stored with high-precision numeric values.
@@ -39,7 +40,6 @@ Keys and constraints:
 Daily prices for Brazilian equities.
 
 Columns:
-- symbol: Market symbol (e.g., PETR4, VALE3).
 - asset: Internal asset label.
 - currency: Quoted currency for the price (e.g., brl).
 - price: Daily price (NUMERIC(18, 6)).
@@ -50,14 +50,13 @@ Columns:
 - ingested_at: When the gold row was written (UTC).
 
 Keys and constraints:
-- Unique key: (symbol, price_date)
+- Unique key: (asset, currency, price_date)
 
 ## Table: gold.indices_daily
 Daily prices for index series (e.g., S&P 500, IBOV).
 
 Columns:
-- index_code: Index identifier (e.g., SP500, IBOV).
-- asset: Internal asset label.
+- asset: Index identifier (e.g., SP500, IBOV).
 - currency: Quoted currency for the index.
 - price: Daily index value (NUMERIC(18, 6)).
 - price_date: Date for the observation (daily grain).
@@ -67,14 +66,13 @@ Columns:
 - ingested_at: When the gold row was written (UTC).
 
 Keys and constraints:
-- Unique key: (index_code, price_date)
+- Unique key: (asset, currency, price_date)
 
 ## Table: gold.etfs_daily
 Daily prices for ETFs (e.g., IVVB11).
 
 Columns:
-- symbol: ETF symbol.
-- asset: Internal asset label.
+- asset: ETF symbol (e.g., IVVB11).
 - currency: Quoted currency for the price.
 - price: Daily price (NUMERIC(18, 6)).
 - price_date: Date for the observation (daily grain).
@@ -84,7 +82,7 @@ Columns:
 - ingested_at: When the gold row was written (UTC).
 
 Keys and constraints:
-- Unique key: (symbol, price_date)
+- Unique key: (asset, currency, price_date)
 
 ## Topology Recommendation
 A category-specific, multi-star topology works best here:

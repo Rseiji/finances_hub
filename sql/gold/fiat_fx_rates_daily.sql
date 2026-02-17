@@ -1,7 +1,8 @@
 INSERT INTO gold.fiat_fx_rates_daily (
-    pair_code,
+    asset,
     base_currency,
     quote_currency,
+    currency,
     rate,
     rate_date,
     rate_ts,
@@ -9,9 +10,10 @@ INSERT INTO gold.fiat_fx_rates_daily (
     silver_request_id
 )
 SELECT
-    replace(s.symbol, '=X', '') AS pair_code,
+    replace(s.symbol, '=X', '') AS asset,
     left(replace(s.symbol, '=X', ''), 3) AS base_currency,
     right(replace(s.symbol, '=X', ''), 3) AS quote_currency,
+    right(replace(s.symbol, '=X', ''), 3) AS currency,
     s.price AS rate,
     s.price_date AS rate_date,
     s.price_ts AS rate_ts,
@@ -20,7 +22,7 @@ SELECT
 FROM silver.yfinance_prices AS s
 WHERE s.symbol LIKE '%=X'
   AND length(replace(s.symbol, '=X', '')) = 6
-ON CONFLICT (pair_code, rate_date)
+ON CONFLICT (asset, currency, rate_date)
 DO UPDATE SET
     rate = EXCLUDED.rate,
     rate_ts = EXCLUDED.rate_ts,

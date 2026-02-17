@@ -1,5 +1,4 @@
 INSERT INTO gold.indices_daily (
-    index_code,
     asset,
     currency,
     price,
@@ -9,11 +8,6 @@ INSERT INTO gold.indices_daily (
     silver_request_id
 )
 SELECT
-    CASE
-        WHEN s.symbol = '^GSPC' THEN 'SP500'
-        WHEN s.symbol = '^BVSP' THEN 'IBOV'
-        ELSE ltrim(s.symbol, '^')
-    END AS index_code,
     s.asset,
     s.currency,
     s.price,
@@ -23,7 +17,7 @@ SELECT
     s.request_id AS silver_request_id
 FROM silver.yfinance_prices AS s
 WHERE s.symbol LIKE '^%'
-ON CONFLICT (index_code, price_date)
+ON CONFLICT (asset, currency, price_date)
 DO UPDATE SET
     price = EXCLUDED.price,
     asset = EXCLUDED.asset,
