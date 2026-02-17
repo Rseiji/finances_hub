@@ -146,6 +146,6 @@ def test_run_all_custom_jobs() -> None:
     def _job_two(_config: OrchestrationConfig) -> int:
         return 2
 
-    results = runner.run_all(jobs={"one": _job_one, "two": _job_two}, config=config)
+    results = runner.run_all(jobs={"one": _job_one, "two": _job_two}, config=config, run_tests=False)
 
     assert results == {"one": 1, "two": 2}

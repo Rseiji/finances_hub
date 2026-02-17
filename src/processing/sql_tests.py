@@ -5,8 +5,6 @@ from pathlib import Path
 
 import psycopg
 
-from processing.sql_tests import run_sql_tests
-
 
 def _conninfo(dsn: str | None) -> str:
     conninfo = dsn or os.environ.get("FINANCES_HUB_PG_DSN")
@@ -15,34 +13,26 @@ def _conninfo(dsn: str | None) -> str:
     return conninfo
 
 
-def run_silver_transforms(dsn: str | None = None, run_tests: bool = True) -> dict[str, int]:
-    statements = _load_statements(_sql_dir())
+def run_sql_tests(dsn: str | None, tests_dir: Path) -> int:
+    statements = _load_statements(tests_dir)
+    if not statements:
+        return 0
     with psycopg.connect(_conninfo(dsn)) as conn:
         with conn.cursor() as cur:
             for statement in statements:
                 cur.execute(statement)
         conn.commit()
-    if run_tests:
-        run_sql_tests(dsn, _tests_dir())
-
-    return {"statements": len(statements)}
+    return len(statements)
 
 
-def _sql_dir() -> Path:
-    return Path(__file__).resolve().parents[3] / "sql" / "silver"
-
-
-def _tests_dir() -> Path:
-    return Path(__file__).resolve().parents[3] / "sql" / "silver" / "tests"
-
-
-def _load_statements(sql_dir: Path) -> list[str]:
+def _load_statements(tests_dir: Path) -> list[str]:
     statements: list[str] = []
-    for path in sorted(sql_dir.glob("*.sql")):
-        if path.name == "schema.sql":
-            continue
+    for path in sorted(tests_dir.glob("*.sql")):
         sql = path.read_text(encoding="utf-8")
-        statements.extend(_split_sql(sql))
+        if "DO $$" in sql:
+            statements.append(sql.strip())
+        else:
+            statements.extend(_split_sql(sql))
     return statements
 
 

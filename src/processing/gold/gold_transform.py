@@ -5,6 +5,8 @@ from pathlib import Path
 
 import psycopg
 
+from processing.sql_tests import run_sql_tests
+
 
 def _conninfo(dsn: str | None) -> str:
     conninfo = dsn or os.environ.get("FINANCES_HUB_PG_DSN")
@@ -13,19 +15,25 @@ def _conninfo(dsn: str | None) -> str:
     return conninfo
 
 
-def run_gold_transforms(dsn: str | None = None) -> dict[str, int]:
+def run_gold_transforms(dsn: str | None = None, run_tests: bool = True) -> dict[str, int]:
     statements = _load_statements(_sql_dir())
     with psycopg.connect(_conninfo(dsn)) as conn:
         with conn.cursor() as cur:
             for statement in statements:
                 cur.execute(statement)
         conn.commit()
+    if run_tests:
+        run_sql_tests(dsn, _tests_dir())
 
     return {"statements": len(statements)}
 
 
 def _sql_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "sql" / "gold"
+
+
+def _tests_dir() -> Path:
+    return Path(__file__).resolve().parents[3] / "sql" / "gold" / "tests"
 
 
 def _load_statements(sql_dir: Path) -> list[str]:

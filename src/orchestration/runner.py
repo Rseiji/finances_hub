@@ -4,9 +4,12 @@ import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from pathlib import Path
+
 from ingestion.binance import fetch_klines_daily
 from ingestion.persist import Sink, inject_envelopes
 from ingestion.yfinance_stock import fetch_close_prices
+from processing.sql_tests import run_sql_tests
 
 
 @dataclass
@@ -18,6 +21,7 @@ class OrchestrationConfig:
 def run_all(
     jobs: dict[str, callable] | None = None,
     config: OrchestrationConfig | None = None,
+    run_tests: bool = True,
 ) -> dict[str, int]:
     config = config or OrchestrationConfig()
     end_date = date.today().isoformat()
@@ -62,7 +66,10 @@ def run_all(
         ),
     }
 
-    return {name: job(config) for name, job in job_map.items()}
+    results = {name: job(config) for name, job in job_map.items()}
+    if run_tests:
+        run_sql_tests(config.dsn, _tests_dir())
+    return results
 
 
 def make_binance_job(
@@ -141,3 +148,7 @@ def run_asset_ingestion(
 def _apply_dsn(dsn: str | None) -> None:
     if dsn:
         os.environ["FINANCES_HUB_PG_DSN"] = dsn
+
+
+def _tests_dir() -> Path:
+    return Path(__file__).resolve().parents[2] / "sql" / "bronze" / "tests"
