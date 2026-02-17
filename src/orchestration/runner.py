@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import date, timedelta
-
 from pathlib import Path
+import re
 
 from ingestion.binance import fetch_klines_daily
 from ingestion.persist import Sink, inject_envelopes
@@ -25,70 +25,8 @@ def run_all(
 ) -> dict[str, int]:
     config = config or OrchestrationConfig()
     end_date = date.today().isoformat()
-    start_date = (date.today() - timedelta(days=7)).isoformat()
-    history_start_date = "2020-01-01"
-    yfinance_start_date = history_start_date
-    job_map = jobs or {
-        "binance_btcusdt_daily": make_binance_job(
-            "BTCUSDT",
-            start_date=history_start_date,
-            end_date=end_date,
-            quote_currency="usdt",
-            asset="BTC",
-        ),
-        "binance_ethusdt_daily": make_binance_job(
-            "ETHUSDT",
-            start_date=history_start_date,
-            end_date=end_date,
-            quote_currency="usdt",
-            asset="ETH",
-        ),
-        "binance_solusdt_daily": make_binance_job(
-            "SOLUSDT",
-            start_date=history_start_date,
-            end_date=end_date,
-            quote_currency="usdt",
-            asset="SOL",
-        ),
-        "yfinance_sp500": make_yfinance_job(
-            "^GSPC",
-            job_name="yfinance_sp500",
-            start_date=yfinance_start_date,
-            end_date=end_date,
-            currency="usd",
-        ),
-        "yfinance_ibov": make_yfinance_job(
-            "^BVSP",
-            job_name="yfinance_ibov",
-            start_date=yfinance_start_date,
-            end_date=end_date,
-            currency="brl",
-        ),
-        "yfinance_petr4": make_yfinance_job(
-            "PETR4.SA",
-            job_name="yfinance_petr4",
-            start_date=yfinance_start_date,
-            end_date=end_date,
-            currency="brl",
-            asset="PETR4",
-        ),
-        "yfinance_mypk3": make_yfinance_job(
-            "MYPK3.SA",
-            job_name="yfinance_mypk3",
-            start_date=yfinance_start_date,
-            end_date=end_date,
-            currency="brl",
-            asset="MYPK3",
-        ),
-        "yfinance_vale3": make_yfinance_job(
-            "VALE3.SA",
-            job_name="yfinance_vale3",
-            start_date=yfinance_start_date,
-            end_date=end_date,
-            currency="brl",
-            asset="VALE3",
-        ),
-    }
+    start_date = "2020-01-01"
+    job_map = jobs or _load_jobs_from_yaml(_jobs_path(), start_date, end_date)
 
     results = {name: job(config) for name, job in job_map.items()}
     if run_tests:
@@ -176,3 +114,88 @@ def _apply_dsn(dsn: str | None) -> None:
 
 def _tests_dir() -> Path:
     return Path(__file__).resolve().parents[2] / "sql" / "bronze" / "tests"
+
+
+def _jobs_path() -> Path:
+    return Path(__file__).resolve().parents[2] / "config" / "ingestion_jobs.yaml"
+
+
+def _load_jobs_from_yaml(path: Path, start_date: str, end_date: str) -> dict[str, callable]:
+    if not path.exists():
+        raise FileNotFoundError(f"Missing ingestion jobs file: {path}")
+    jobs = _parse_jobs_yaml(path.read_text(encoding="utf-8"))
+    return _build_job_map(jobs, start_date, end_date)
+
+
+def _build_job_map(
+    jobs: list[dict[str, str]],
+    start_date: str,
+    end_date: str,
+) -> dict[str, callable]:
+    job_map: dict[str, callable] = {}
+    for job in jobs:
+        name = job.get("name")
+        kind = job.get("type")
+        if not name or not kind:
+            raise ValueError("Each job requires name and type")
+        if kind == "binance":
+            job_map[name] = make_binance_job(
+                job["symbol"],
+                start_date=job.get("start_date") or start_date,
+                end_date=job.get("end_date") or end_date,
+                quote_currency=job.get("quote_currency", "usdt"),
+                job_name=name,
+                asset=job.get("asset"),
+            )
+        elif kind == "yfinance":
+            job_map[name] = make_yfinance_job(
+                job["symbol"],
+                job_name=name,
+                start_date=job.get("start_date") or start_date,
+                end_date=job.get("end_date") or end_date,
+                currency=job.get("currency"),
+                asset=job.get("asset"),
+            )
+        else:
+            raise ValueError(f"Unknown job type: {kind}")
+    return job_map
+
+
+def _parse_jobs_yaml(text: str) -> list[dict[str, str]]:
+    jobs: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        if line.strip() == "jobs:":
+            continue
+        if line.lstrip().startswith("-"):
+            current = {}
+            jobs.append(current)
+            line = line.lstrip()[1:].strip()
+            if line:
+                key, value = _parse_kv(line)
+                current[key] = _substitute(value)
+            continue
+        if current is None:
+            raise ValueError("Jobs YAML must start with a list item")
+        key, value = _parse_kv(line.strip())
+        current[key] = _substitute(value)
+    return jobs
+
+
+def _parse_kv(line: str) -> tuple[str, str]:
+    if ":" not in line:
+        raise ValueError(f"Invalid line in jobs YAML: {line}")
+    key, value = line.split(":", 1)
+    return key.strip(), value.strip().strip("'\"")
+
+
+def _substitute(value: str) -> str:
+    pattern = re.compile(r"\$\{([^}]+)\}")
+
+    def _replace(match: re.Match[str]) -> str:
+        return os.environ.get(match.group(1), "")
+
+    return pattern.sub(_replace, value)

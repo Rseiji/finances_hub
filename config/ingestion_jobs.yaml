@@ -1,0 +1,41 @@
+jobs:
+  - name: binance_btcusdt_daily
+    type: binance
+    symbol: BTCUSDT
+    quote_currency: usdt
+    asset: BTC
+  - name: binance_ethusdt_daily
+    type: binance
+    symbol: ETHUSDT
+    quote_currency: usdt
+    asset: ETH
+  - name: binance_solusdt_daily
+    type: binance
+    symbol: SOLUSDT
+    quote_currency: usdt
+    asset: SOL
+  - name: yfinance_sp500
+    type: yfinance
+    symbol: ^GSPC
+    currency: usd
+    asset: SP500
+  - name: yfinance_ibov
+    type: yfinance
+    symbol: ^BVSP
+    currency: brl
+    asset: IBOV
+  - name: yfinance_petr4
+    type: yfinance
+    symbol: PETR4.SA
+    currency: brl
+    asset: PETR4
+  - name: yfinance_mypk3
+    type: yfinance
+    symbol: MYPK3.SA
+    currency: brl
+    asset: MYPK3
+  - name: yfinance_vale3
+    type: yfinance
+    symbol: VALE3.SA
+    currency: brl
+    asset: VALE3
