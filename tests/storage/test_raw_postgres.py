@@ -5,13 +5,17 @@ from typing import Any
 import pandas as pd
 from psycopg.types.json import Json
 
-from storage.raw_postgres import append_dataframe_to_bronze
+from storage.raw_postgres import append_dataframe_to_bronze, overwrite_dataframe_in_bronze
 
 
 class _FakeCursor:
     def __init__(self) -> None:
         self.query: Any | None = None
         self.rows: list[tuple[Any, ...]] | None = None
+        self.executed_queries: list[Any] = []
+
+    def execute(self, query: Any, params: Any | None = None) -> None:
+        self.executed_queries.append((query, params))
 
     def executemany(self, query: Any, rows: list[tuple[Any, ...]]) -> None:
         self.query = query
@@ -109,3 +113,41 @@ def test_append_dataframe_to_bronze_empty_dataframe_returns_zero(
 
     assert inserted == 0
     assert called["connect"] is False
+
+
+def test_overwrite_dataframe_in_bronze_replaces_rows(
+    monkeypatch: Any,
+) -> None:
+    fake_conn = _FakeConn()
+
+    def _connect(*args: Any, **kwargs: Any) -> _FakeConn:
+        return fake_conn
+
+    monkeypatch.setenv("FINANCES_HUB_PG_DSN", "postgresql://local/test")
+    monkeypatch.setattr("storage.raw_postgres.psycopg.connect", _connect)
+
+    df = pd.DataFrame(
+        [
+            {
+                "date": "2024-05-02",
+                "taxa_liquidacao": 5.93,
+                "emolumento": 1.18,
+                "transf_ativos": 0.0,
+            },
+            {
+                "date": "2024-06-05",
+                "taxa_liquidacao": 1.47,
+                "emolumento": 0.29,
+                "transf_ativos": 0.0,
+            },
+        ]
+    )
+
+    inserted = overwrite_dataframe_in_bronze(df, "nubank_trade_taxes")
+
+    assert inserted == 2
+    assert fake_conn.committed is True
+    assert len(fake_conn.cursor_obj.executed_queries) == 1
+    assert fake_conn.cursor_obj.query is not None
+    assert fake_conn.cursor_obj.rows is not None
+    assert fake_conn.cursor_obj.rows[0] == ("2024-05-02", 5.93, 1.18, 0.0)

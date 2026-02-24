@@ -83,6 +83,53 @@ ranked AS (
             ORDER BY fetched_at DESC, batch_id DESC, event_id DESC
         ) AS row_rank
     FROM transformed
+),
+final_rows AS (
+    SELECT
+        event_id,
+        batch_id,
+        ticker,
+        quantidade,
+        preco,
+        valor,
+        date,
+        fetched_at
+    FROM ranked
+    WHERE row_rank = 1
+),
+date_taxes AS (
+    SELECT
+        t.date,
+        (
+            COALESCE(SUM(t.taxa_liquidacao), 0)
+            + COALESCE(SUM(t.emolumento), 0)
+            + COALESCE(SUM(t.transf_ativos), 0)
+        )::DOUBLE PRECISION AS total_tax
+    FROM bronze.nubank_trade_taxes AS t
+    GROUP BY t.date
+),
+allocated AS (
+    SELECT
+        f.event_id,
+        f.batch_id,
+        f.ticker,
+        f.quantidade,
+        f.preco,
+        f.valor,
+        CASE
+            WHEN SUM(ABS(f.valor)) OVER (PARTITION BY f.date) > 0
+            THEN COALESCE(dt.total_tax, 0)
+                 * (
+                     ABS(f.valor)
+                     / SUM(ABS(f.valor)) OVER (PARTITION BY f.date)
+                 )
+            ELSE 0
+        END AS tax,
+        f.date,
+        f.fetched_at
+    FROM final_rows AS f
+    LEFT JOIN date_taxes AS dt
+      ON dt.date = f.date
 )
 INSERT INTO gold.nubank_trade_events (
     event_id,
@@ -91,6 +138,7 @@ INSERT INTO gold.nubank_trade_events (
     quantidade,
     preco,
     valor,
+    tax,
     date,
     fetched_at
 )
@@ -101,10 +149,10 @@ SELECT
     quantidade,
     preco,
     valor,
+    tax,
     date,
     fetched_at
-FROM ranked
-WHERE row_rank = 1
+FROM allocated
 ON CONFLICT (date, ticker, quantidade, preco)
 DO UPDATE SET
     event_id = EXCLUDED.event_id,
@@ -113,6 +161,7 @@ DO UPDATE SET
     quantidade = EXCLUDED.quantidade,
     preco = EXCLUDED.preco,
     valor = EXCLUDED.valor,
+    tax = EXCLUDED.tax,
     date = EXCLUDED.date,
     fetched_at = EXCLUDED.fetched_at,
     ingested_at = NOW();

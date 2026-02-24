@@ -88,10 +88,12 @@ def _print_gold_rows(rows: list[dict[str, Any]]) -> None:
         "quantidade",
         "preco",
         "valor",
+        "tax",
         "fetched_at",
         "ingested_at",
     ]
-    frame = frame[ordered_columns]
+    existing_columns = [column for column in ordered_columns if column in frame.columns]
+    frame = frame[existing_columns]
     print(frame.to_string(index=False))
 
 def run_trading_notes(

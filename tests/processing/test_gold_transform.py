@@ -24,3 +24,5 @@ def test_gold_transform_sql_contains_upserts() -> None:
     assert "INSERT INTO gold.br_stocks_daily" in br_sql
     assert "INSERT INTO gold.nubank_trade_events" in nubank_sql
     assert "FROM silver.nubank_trade_events" in nubank_sql
+    assert "FROM bronze.nubank_trade_taxes" in nubank_sql
+    assert "AS tax" in nubank_sql

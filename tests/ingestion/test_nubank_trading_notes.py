@@ -44,6 +44,10 @@ def test_ingest_nubank_trading_notes_appends_dataframe_to_bronze(monkeypatch: An
         "ingestion.nubank_trading_notes.append_dataframe_to_bronze",
         _append_dataframe_to_bronze,
     )
+    monkeypatch.setattr(
+        "ingestion.nubank_trading_notes.ingest_nubank_taxes_overwrite",
+        lambda: 43,
+    )
 
     inserted = ingest_nubank_trading_notes(
         path=str(pdf_file),

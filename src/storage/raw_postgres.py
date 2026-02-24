@@ -112,3 +112,52 @@ def append_dataframe_to_bronze(
             cur.executemany(query, rows)
         conn.commit()
     return len(rows)
+
+
+def overwrite_dataframe_in_bronze(
+    df: pd.DataFrame,
+    table_name: str,
+    *,
+    schema_name: str = "bronze",
+) -> int:
+    if not table_name.strip():
+        raise ValueError("table_name must not be empty.")
+
+    if not schema_name.strip():
+        raise ValueError("schema_name must not be empty.")
+
+    prepared = df.copy().where(pd.notna(df), None)
+
+    with psycopg.connect(_conninfo(), row_factory=dict_row) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                sql.SQL("TRUNCATE TABLE {}.{}").format(
+                    sql.Identifier(schema_name),
+                    sql.Identifier(table_name),
+                )
+            )
+
+            if not prepared.empty:
+                columns = list(prepared.columns)
+                rows = [
+                    tuple(record[col] for col in columns)
+                    for record in prepared.to_dict(orient="records")
+                ]
+                identifiers = sql.SQL(", ").join(sql.Identifier(column) for column in columns)
+                placeholders = sql.SQL(", ").join(sql.Placeholder() for _ in columns)
+                query = sql.SQL(
+                    """
+                    INSERT INTO {}.{} ({})
+                    VALUES ({})
+                    """
+                ).format(
+                    sql.Identifier(schema_name),
+                    sql.Identifier(table_name),
+                    identifiers,
+                    placeholders,
+                )
+                cur.executemany(query, rows)
+
+        conn.commit()
+
+    return len(prepared)

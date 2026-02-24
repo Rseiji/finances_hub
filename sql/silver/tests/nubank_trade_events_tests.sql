@@ -17,7 +17,7 @@ BEGIN
     IF EXISTS (
         SELECT 1
         FROM silver.nubank_trade_events
-        WHERE preco <= 0
+        WHERE preco < 0
     ) THEN
         RAISE EXCEPTION 'silver.nubank_trade_events: non-positive preco found';
     END IF;

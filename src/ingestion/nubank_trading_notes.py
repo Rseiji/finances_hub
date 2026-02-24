@@ -1,10 +1,11 @@
 import os
 import re
+from pathlib import Path
 
 import pandas as pd
 import pdfplumber
 
-from storage.raw_postgres import append_dataframe_to_bronze
+from storage.raw_postgres import append_dataframe_to_bronze, overwrite_dataframe_in_bronze
 
 TABLE_COLUMNS = [
     "mercado",
@@ -32,6 +33,15 @@ BRONZE_COLUMNS = [
     "file_name",
     "date",
 ]
+
+TAXES_COLUMNS = [
+    "date",
+    "taxa_liquidacao",
+    "emolumento",
+    "transf_ativos",
+]
+
+TAXES_CSV_PATH = Path(__file__).resolve().parents[2] / "sql" / "gold" / "manual_backfills" / "taxes.csv"
 
 
 def _is_header_row(row: list[object | None]) -> bool:
@@ -233,6 +243,8 @@ def ingest_nubank_trading_notes(
     path: str,
     date: str,
 ) -> int:
+    ingest_nubank_taxes_overwrite()
+
     df = parse_nubank_trade_notes(
         path,
         date,
@@ -246,4 +258,27 @@ def ingest_nubank_trading_notes(
         source="nubank_trading_notes_pdf",
         endpoint="pdfplumber.extract_tables",
         request_params={"pdf_path": path},
+    )
+
+
+def ingest_nubank_taxes_overwrite(csv_path: str | Path | None = None) -> int:
+    path = Path(csv_path) if csv_path is not None else TAXES_CSV_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"Missing taxes CSV file: {path}")
+
+    frame = pd.read_csv(path)
+    missing_columns = set(TAXES_COLUMNS) - set(frame.columns)
+    if missing_columns:
+        missing_text = ", ".join(sorted(missing_columns))
+        raise ValueError(f"taxes CSV is missing required columns: {missing_text}")
+
+    frame = frame[TAXES_COLUMNS].copy()
+    frame["date"] = pd.to_datetime(frame["date"], format="%Y-%m-%d", errors="raise").dt.date
+    frame["taxa_liquidacao"] = pd.to_numeric(frame["taxa_liquidacao"], errors="raise")
+    frame["emolumento"] = pd.to_numeric(frame["emolumento"], errors="raise")
+    frame["transf_ativos"] = pd.to_numeric(frame["transf_ativos"], errors="raise")
+
+    return overwrite_dataframe_in_bronze(
+        frame,
+        "nubank_trade_taxes",
     )

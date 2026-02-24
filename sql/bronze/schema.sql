@@ -45,3 +45,13 @@ CREATE INDEX IF NOT EXISTS idx_pdf_nubank_trade_events_uid ON bronze.pdf_nubank_
 CREATE INDEX IF NOT EXISTS idx_pdf_nubank_trade_events_file_name ON bronze.pdf_nubank_trade_events (file_name);
 CREATE INDEX IF NOT EXISTS idx_pdf_nubank_trade_events_date ON bronze.pdf_nubank_trade_events (date);
 CREATE INDEX IF NOT EXISTS idx_pdf_nubank_trade_events_fetched_at ON bronze.pdf_nubank_trade_events (fetched_at);
+
+CREATE TABLE IF NOT EXISTS bronze.nubank_trade_taxes (
+    date DATE PRIMARY KEY,
+    taxa_liquidacao NUMERIC(12, 2) NOT NULL,
+    emolumento NUMERIC(12, 2) NOT NULL,
+    transf_ativos NUMERIC(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_nubank_trade_taxes_date ON bronze.nubank_trade_taxes (date);
