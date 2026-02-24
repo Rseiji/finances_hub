@@ -5,6 +5,18 @@ This module runs ingestion jobs with simple functional runners and job factories
 - Fetch envelopes from the provider.
 - Inject envelopes into bronze storage.
 
+It also includes a trading notes pipeline entrypoint for Nubank PDFs:
+
+```bash
+PYTHONPATH=src python src/orchestration/run_trading_notes.py --path /absolute/path/to/file.pdf --date YYYY-MM-DD
+```
+
+Trading notes pipeline steps:
+- Ingests PDF trades into `bronze.pdf_nubank_trade_events`.
+- Overwrites `bronze.nubank_trade_taxes` from `sql/gold/manual_backfills/taxes.csv`.
+- Runs silver and gold transforms.
+- Writes `gold.nubank_trade_events.tax` by proportional daily allocation of taxes.
+
 ## Job Factory Usage
 Create job callables by passing the asset identifier and explicit backfill parameters:
 
