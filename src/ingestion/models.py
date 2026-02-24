@@ -32,32 +32,3 @@ class RawEnvelope:
             "fetched_at": self.fetched_at,
             "payload": self.payload,
         }
-
-
-@dataclass(frozen=True)
-class PdfTradeEvent:
-    uid: str
-    source: str
-    request_params: dict[str, Any]
-    fetched_at: str
-    mercado: str
-    cv: str
-    tipo_mercado: str
-    espec_titulo: str
-    observacao: str
-    quantidade: int
-    preco: Decimal
-    valor: Decimal
-    dc: str
-    taxa_liquidacao: Decimal
-    emolumentos: Decimal
-    taxa_transf_ativos: Decimal
-    file_path: str
-    file_name: str
-    statement_date: date | None
-
-    def __post_init__(self) -> None:
-        if self.dc not in {"C", "D"}:
-            raise ValueError("dc must be 'C' or 'D'")
-        if self.quantidade < 0:
-            raise ValueError("quantidade must be >= 0")

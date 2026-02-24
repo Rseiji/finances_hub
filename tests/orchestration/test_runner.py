@@ -149,3 +149,16 @@ def test_run_all_custom_jobs() -> None:
     results = runner.run_all(jobs={"one": _job_one, "two": _job_two}, config=config, run_tests=False)
 
     assert results == {"one": 1, "two": 2}
+
+
+def test_build_job_map_rejects_unknown_job_type() -> None:
+    jobs = [
+        {
+            "name": "manual_trading_notes",
+            "type": "bank_pdf",
+            "pdf_path": "/tmp/statement.pdf",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="Unknown job type: bank_pdf"):
+        runner._build_job_map(jobs, start_date="2020-01-01", end_date="2020-01-02")

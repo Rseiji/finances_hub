@@ -76,3 +76,21 @@ CREATE TABLE IF NOT EXISTS gold.etfs_daily (
 
 CREATE INDEX IF NOT EXISTS idx_etfs_daily_asset ON gold.etfs_daily (asset);
 CREATE INDEX IF NOT EXISTS idx_etfs_daily_date ON gold.etfs_daily (price_date);
+
+CREATE TABLE IF NOT EXISTS gold.nubank_trade_events (
+    event_id TEXT NOT NULL,
+    batch_id UUID NOT NULL,
+    ticker TEXT NOT NULL,
+    quantidade DOUBLE PRECISION NOT NULL,
+    preco DOUBLE PRECISION NOT NULL,
+    valor DOUBLE PRECISION NOT NULL,
+    date DATE NOT NULL,
+    fetched_at TIMESTAMPTZ NOT NULL,
+    ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT nubank_trade_events_uniq UNIQUE (date, ticker, quantidade, preco)
+);
+
+CREATE INDEX IF NOT EXISTS idx_gold_nubank_trade_events_batch_id ON gold.nubank_trade_events (batch_id);
+CREATE INDEX IF NOT EXISTS idx_gold_nubank_trade_events_ticker ON gold.nubank_trade_events (ticker);
+CREATE INDEX IF NOT EXISTS idx_gold_nubank_trade_events_date ON gold.nubank_trade_events (date);
+CREATE INDEX IF NOT EXISTS idx_gold_nubank_trade_events_fetched_at ON gold.nubank_trade_events (fetched_at);

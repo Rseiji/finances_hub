@@ -63,6 +63,17 @@ print(results)
 PY
 ```
 
+#### Bronze Ingestion (Trading Notes Ingestion - Nubank)
+Run the manual trading notes ingestion process (separate from orchestration). It parses tables with `pdfplumber` + `extract_tables`, asks for confirmation, and only then ingests into bronze:
+
+Example execution:
+
+```bash
+source .venv/bin/activate
+export FINANCES_HUB_PG_DSN=postgresql://<user>:<password>@localhost:5432/finances_hub
+PYTHONPATH=src python -m trading_notes_ingestion.run --pdf-path /absolute/path/to/nubank_trading_notes.pdf --bank nubank
+```
+
 ## Repository Structure (Planned)
 ```
 finances_hub/

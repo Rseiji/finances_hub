@@ -10,6 +10,7 @@ def test_gold_transform_sql_contains_upserts() -> None:
     indices_sql = (sql_dir / "indices_daily.sql").read_text(encoding="utf-8")
     etfs_sql = (sql_dir / "etfs_daily.sql").read_text(encoding="utf-8")
     br_sql = (sql_dir / "br_stocks_daily.sql").read_text(encoding="utf-8")
+    nubank_sql = (sql_dir / "nubank_trade_events.sql").read_text(encoding="utf-8")
 
     assert "INSERT INTO gold.crypto_prices_daily" in crypto_sql
     assert "FROM silver.binance_prices" in crypto_sql
@@ -21,3 +22,5 @@ def test_gold_transform_sql_contains_upserts() -> None:
     assert "INSERT INTO gold.etfs_daily" in etfs_sql
     assert "ON CONFLICT (asset, currency, price_date)" in etfs_sql
     assert "INSERT INTO gold.br_stocks_daily" in br_sql
+    assert "INSERT INTO gold.nubank_trade_events" in nubank_sql
+    assert "FROM silver.nubank_trade_events" in nubank_sql
